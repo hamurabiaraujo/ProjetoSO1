@@ -140,7 +140,6 @@ void MainWindow::calculaTempoQuickSorte(){
     arquivoSaida.close();
 }
 
-
 //Calcula o desvio padrão de cada passo de execução.
 double MainWindow::calcularDesvioPadrao(vector<int> vetorTempos, double media){
     double aux;
@@ -240,7 +239,6 @@ bool MainWindow::validacao(){
     return contemEntradasValidas;
 }
 
-
 //Inicializa as variáveis do programa
 void MainWindow::iniciar(){
 
@@ -250,7 +248,9 @@ void MainWindow::iniciar(){
         return;
     }else{
         ui->console->setText(ui->console->toPlainText() + "INICIANDO... \n");
-        tempo_inicial = time((time_t*)0);
+        tempo_inicial = time((time_t*)0);   //tempo inicial
+
+        //pegando as entradas
         numIteracoes = 0;
         numeroIteracoes = MainWindow::ui->numeroIteracoes->text().toInt();
         dimensao = MainWindow::ui->dimensao->text();
@@ -265,7 +265,7 @@ void MainWindow::iniciar(){
         tempos = vector<int> (numeroIteracoes);
         medias = vector<double> (numeroPassos);
 
-
+        //criando os vetores de tamanos e sementes
         tamanhos[0] = tamanhoInicial;
         sementes[0] = ( rand() % (tamanhoFinal * 2) );
 
@@ -274,10 +274,12 @@ void MainWindow::iniciar(){
             sementes[i] = ( rand() % (tamanhoFinal * 2) );
         }
 
+        //verificando quais algoritmos foram selecionados
         bool selecionouQuickSort = ui->checkBox->isChecked();
         bool selecionouSelectSort = ui->checkBox_3->isChecked();
         bool selecionouBubbleSort = ui->checkBox_2->isChecked();
 
+        //calculando o número de passos
         if (selecionouBubbleSort && selecionouQuickSort && selecionouSelectSort)
         {
             totalIteracoes = (3 * (numeroPassos * numeroIteracoes ));
@@ -312,16 +314,17 @@ void MainWindow::iniciar(){
                 calculaTempoQuickSorte();
             if (selecionouSelectSort)
                 calculaTempoSelectSort();
-
         }
-        tempo_final = time((time_t*)0);
-        int tempoTotalExecucao = tempo_final - tempo_inicial;
+        tempo_final = time((time_t*)0);     //pegando tempo final
+        int tempoTotalExecucao = tempo_final - tempo_inicial;   //calculando o tempo total
 
         QString mensagem = "Fim de Execução!\n Tempo total de execução = " + QString::number(tempoTotalExecucao) + " segundos.";
 
         QMessageBox::information(this,
           "Mensagem",
           mensagem);
+
+        gerarGrafico(selecionouQuickSort, selecionouSelectSort, selecionouBubbleSort, tempoTotalExecucao);
     }
 }
 
@@ -334,6 +337,13 @@ void MainWindow::reset(){
     medias.clear();
     tempos.clear();
     ui->console->setText("");
+    ui->console->setStyleSheet("background:#000;");
+}
+
+void MainWindow::on_pushButtonMostrarGrafico_clicked()
+{
+    ui->console->clear();
+    ui->console->setStyleSheet("background-image:url(grafico.png);");
 }
 
 //Ativado quando clica-se no botão 'Executar'
@@ -343,6 +353,71 @@ void MainWindow::on_executar_clicked()
     iniciar();
 }
 
+//Calcula a data atual
+void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSort, bool selecionouBubbleSort, int tempoTotal){
+    QString dia = "";
+    ofstream script;
+    script.open("grafico.gnuplot", std::ofstream::out | std::ofstream::app);
+    int diaSemana = aTime->tm_wday;
+    int diaMes = aTime->tm_mday;
+    int mes = aTime->tm_mon + 1;
+    int ano = aTime->tm_year + 1900;
+
+
+    switch (diaSemana) {
+    case 0:
+        dia = "Domingo";
+        break;
+    case 1:
+        dia = "Segunda-Feira";
+        break;
+    case 2:
+        dia = "Terça-Feira";
+        break;
+    case 3:
+        dia = "Quarta-Feira";
+        break;
+    case 4:
+        dia = "Quinta-Feira";
+        break;
+    case 5:
+        dia = "Sexta-Feira";
+        break;
+    default:
+        dia = "Sábado";
+        break;
+    }
+
+    script << "set encoding iso_8859_1"<<endl<<"set grid";
+    if (selecionouBubbleSort && selecionouQuickSort && selecionouSelectSort)
+    {
+
+    }
+    else if ( (selecionouBubbleSort && selecionouQuickSort) || (selecionouBubbleSort && selecionouSelectSort) || (selecionouQuickSort && selecionouSelectSort) )
+        {
+            if (selecionouBubbleSort && selecionouQuickSort)
+            {
+
+            }
+            else if (selecionouBubbleSort && selecionouSelectSort)
+            {
+
+            }else
+            {
+
+            }
+    }
+    else
+    {
+        if (selecionouBubbleSort)
+
+        if (selecionouQuickSort)
+
+        if (selecionouSelectSort);
+
+    }
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -350,4 +425,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->progressBar->setValue(0);
     ui->console->setText("");
+
+    //resetando os arquivos
+    ofstream arquivoBubble, arquivoSelect, arquivoQuick;
+    arquivoQuick.open("saidaQuickSort.txt");
+    arquivoBubble.open("saidaBubleSort.txt");
+    arquivoSelect.open("saidaSelectSort.txt");
+    arquivoBubble << "";
+    arquivoQuick << "";
+    arquivoSelect << "";
+    arquivoBubble.close();
+    arquivoQuick.close();
+    arquivoSelect.close();
 }

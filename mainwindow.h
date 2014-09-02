@@ -45,6 +45,8 @@ public:
     QString dimensao;
     QStringList aux;
     int numIteracoes;
+    time_t theTime = time(NULL);
+    struct tm *aTime = localtime(&theTime);
 
 private slots:
 
@@ -75,6 +77,10 @@ private slots:
     void on_numeroIteracoes_textChanged(const QString &arg1);
 
     void on_dimensao_editingFinished();
+
+    void on_pushButtonMostrarGrafico_clicked();
+
+    void gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSort, bool selecionouBubbleSort, int tempoTotal);
 
 private:
     Ui::MainWindow *ui;
