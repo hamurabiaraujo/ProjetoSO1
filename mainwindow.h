@@ -43,6 +43,7 @@ public:
     bool escolheuOrdenacao;
     bool entrouComNumeroIteracoes;
     bool entrouComDimensao;
+    bool graficoGerado;
     QString dimensao;
     QStringList aux;
     int numIteracoes;

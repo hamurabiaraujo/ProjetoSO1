@@ -343,7 +343,13 @@ void MainWindow::reset(){
 void MainWindow::on_pushButtonMostrarGrafico_clicked()
 {
     ui->console->clear();
-    ui->console->setStyleSheet("background-image:url(grafico.png);");
+    if (graficoGerado)
+        ui->console->setStyleSheet("background-image:url(grafico.png);");
+    else {
+        QString mensagem = "O gráfico não foi gerado ainda! Por favor, insira os dados e mande executar a ordenação e poderá ver o gráfico resultante da ação.";
+
+        QMessageBox::information(this, "Mensagem",mensagem);
+    }
 }
 
 //Ativado quando clica-se no botão 'Executar'
@@ -399,10 +405,10 @@ void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSor
         script << "plot 'saidaSelectSort.txt' using 1:2 notitle with linespoints ls 1 lt 8"<<endl;
         script << "rep 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 8" <<endl<<endl;
 
-        script << "plot 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
+        script << "rep 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
         script << "rep 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
 
-        script << "plot 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
+        script << "rep 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
         script << "rep 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
     }
     else if ( (selecionouBubbleSort && selecionouQuickSort) || (selecionouBubbleSort && selecionouSelectSort) || (selecionouQuickSort && selecionouSelectSort) )
@@ -412,7 +418,7 @@ void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSor
                 script << "plot 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
                 script << "rep 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
 
-                script << "plot 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
+                script << "rep 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
                 script << "rep 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
             }
             else if (selecionouBubbleSort && selecionouSelectSort)
@@ -420,14 +426,14 @@ void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSor
                 script << "plot 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
                 script << "rep 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
 
-                script << "plot 'saidaSelectSort.txt' using 1:2 notitle with linespoints ls 1 lt 8"<<endl;
+                script << "rep 'saidaSelectSort.txt' using 1:2 notitle with linespoints ls 1 lt 8"<<endl;
                 script << "rep 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 8" <<endl<<endl;
             }else
             {
                 script << "plot 'saidaSelectSort.txt' using 1:2 notitle with linespoints ls 1 lt 8"<<endl;
                 script << "rep 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 8" <<endl<<endl;
 
-                script << "plot 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
+                script << "rep 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
                 script << "rep 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
             }
     }
@@ -448,8 +454,9 @@ void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSor
     }
 
     script << "set terminal png" << endl << "set output \'grafico.png\'" << endl << endl << "replot" << endl;
-
     script.close();
+    system("gnuplot grafico.gnuplot");
+    graficoGerado = true;
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -471,4 +478,6 @@ MainWindow::MainWindow(QWidget *parent) :
     arquivoBubble.close();
     arquivoQuick.close();
     arquivoSelect.close();
+
+    graficoGerado = false;
 }
