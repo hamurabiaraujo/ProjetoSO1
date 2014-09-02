@@ -355,9 +355,9 @@ void MainWindow::on_executar_clicked()
 
 //Calcula a data atual
 void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSort, bool selecionouBubbleSort, int tempoTotal){
-    QString dia = "";
+    string dia = "";
     ofstream script;
-    script.open("grafico.gnuplot", std::ofstream::out | std::ofstream::app);
+    script.open("grafico.gnuplot", std::ofstream::out | std::ofstream::ate);
     int diaSemana = aTime->tm_wday;
     int diaMes = aTime->tm_mday;
     int mes = aTime->tm_mon + 1;
@@ -388,34 +388,68 @@ void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSor
         break;
     }
 
-    script << "set encoding iso_8859_1"<<endl<<"set grid";
+    script << "set encoding iso_8859_1"<<endl<<"set grid"<<endl<<"set key top left"<<endl;
+    script << "set title \""<<diaMes<<"\/"<<mes<<"\/"<<ano<<":"<<dia<<" - Tempo total de execuçao: " <<tempoTotal<<"s\""<<endl;
+    script << "set xlabel \'Tamanho do vetor\' "<<endl<<"set ylabel \'Tempo (segundos)\'"<<endl;
+
+    script << endl;
+
     if (selecionouBubbleSort && selecionouQuickSort && selecionouSelectSort)
     {
+        script << "plot 'saidaSelectSort.txt' using 1:2 notitle with linespoints ls 1 lt 8"<<endl;
+        script << "rep 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 8" <<endl<<endl;
 
+        script << "plot 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
+        script << "rep 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
+
+        script << "plot 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
+        script << "rep 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
     }
     else if ( (selecionouBubbleSort && selecionouQuickSort) || (selecionouBubbleSort && selecionouSelectSort) || (selecionouQuickSort && selecionouSelectSort) )
         {
             if (selecionouBubbleSort && selecionouQuickSort)
             {
+                script << "plot 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
+                script << "rep 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
 
+                script << "plot 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
+                script << "rep 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
             }
             else if (selecionouBubbleSort && selecionouSelectSort)
             {
+                script << "plot 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
+                script << "rep 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
 
+                script << "plot 'saidaSelectSort.txt' using 1:2 notitle with linespoints ls 1 lt 8"<<endl;
+                script << "rep 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 8" <<endl<<endl;
             }else
             {
+                script << "plot 'saidaSelectSort.txt' using 1:2 notitle with linespoints ls 1 lt 8"<<endl;
+                script << "rep 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 8" <<endl<<endl;
 
+                script << "plot 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
+                script << "rep 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
             }
     }
     else
     {
-        if (selecionouBubbleSort)
-
-        if (selecionouQuickSort)
-
-        if (selecionouSelectSort);
-
+        if (selecionouBubbleSort){
+            script << "plot 'saidaBubleSort.txt' using 1:2 notitle with linespoints ls 3 lt 5"<<endl;
+            script << "rep 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
+        }else{
+            if (selecionouQuickSort){
+                script << "plot 'saidaQuickSort.txt' using 1:2 notitle with linespoints ls 2 lt 6"<<endl;
+                script << "rep 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
+            }else{
+                script << "plot 'saidaSelectSort.txt' using 1:2 notitle with linespoints ls 1 lt 8"<<endl;
+                script << "rep 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 8" <<endl<<endl;
+            }
+        }
     }
+
+    script << "set terminal png" << endl << "set output \'grafico.png\'" << endl << endl << "replot" << endl;
+
+    script.close();
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -428,9 +462,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //resetando os arquivos
     ofstream arquivoBubble, arquivoSelect, arquivoQuick;
-    arquivoQuick.open("saidaQuickSort.txt");
-    arquivoBubble.open("saidaBubleSort.txt");
-    arquivoSelect.open("saidaSelectSort.txt");
+    arquivoQuick.open("saidaQuickSort.txt", std::ofstream::out | std::ofstream::trunc);
+    arquivoBubble.open("saidaBubleSort.txt", std::ofstream::out | std::ofstream::trunc);
+    arquivoSelect.open("saidaSelectSort.txt", std::ofstream::out | std::ofstream::trunc);
     arquivoBubble << "";
     arquivoQuick << "";
     arquivoSelect << "";

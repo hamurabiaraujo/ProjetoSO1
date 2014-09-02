@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <vector>
+#include <string>
 
 
 using namespace std;
