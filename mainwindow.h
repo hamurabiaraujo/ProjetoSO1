@@ -33,6 +33,12 @@ public:
     vector<int> sementes;
     vector<int> tamanhos;
     vector<double> medias;
+    vector<double> mediasBuble;
+    vector<double> mediasSelect;
+    vector<double> mediasQuick;
+    vector<double> desvioBubble;
+    vector<double> desvioSelect;
+    vector<double> desvioQuick;
     vector<int> tempos;
     int numeroIteracoes;
     int tamanhoInicial;

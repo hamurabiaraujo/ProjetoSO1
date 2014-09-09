@@ -131,11 +131,11 @@ void MainWindow::calculaTempoQuickSorte(){
             numIteracoes++;
             ui->progressBar->setValue((numIteracoes * 100) / totalIteracoes);
         }
-        media = medias[i] = (double) (aux / numeroIteracoes);
-        desvioPadrao = calcularDesvioPadrao(tempos, media);
-        arquivoSaida << tamanhos[i] << "\t" << (int)media << "\t" << (int)(media - desvioPadrao) << "\t" << (int)(media + desvioPadrao) << "\n";
+        media = medias[i] = mediasQuick[i] = (double) (aux / numeroIteracoes);
+        desvioPadrao = desvioQuick[i] = calcularDesvioPadrao(tempos, mediasQuick[i]);
+        arquivoSaida << tamanhos[i] << "\t" << (int)mediasQuick[i] << "\t" << (int)(mediasQuick[i] - desvioPadrao) << "\t" << (int)(mediasQuick[i] + desvioPadrao) << "\n";
         ui->console->setText(ui->console->toPlainText() + "PASSO: " + QString::number(i+1) + " Tamanho: "
-                             + QString::number(tamanhos[i]) + "\tTempo Médio: " + QString::number(media) + " s \n");
+                             + QString::number(tamanhos[i]) + "\tTempo Médio: " + QString::number(mediasQuick[i]) + " s \n");
     }
     arquivoSaida.close();
 }
@@ -174,11 +174,11 @@ void MainWindow::calculaTempoBubleSorte(){
             numIteracoes++;
             ui->progressBar->setValue((numIteracoes * 100) / totalIteracoes);
         }
-        media = medias[i] = (double) (aux / numeroIteracoes);
-        desvioPadrao = calcularDesvioPadrao(tempos, media);
-        arquivoSaida << tamanhos[i] << "\t" << (int)media << "\t" << (int)(media - desvioPadrao) << "\t" << (int)(media + desvioPadrao) << "\n";
+        media = medias[i] = mediasBuble[i] = (double) (aux / numeroIteracoes);
+        desvioPadrao = desvioBubble[i] = calcularDesvioPadrao(tempos, media);
+        arquivoSaida << tamanhos[i] << "\t" << (int)mediasBuble[i] << "\t" << (int)(mediasBuble[i] - desvioPadrao) << "\t" << (int)(mediasBuble[i] + desvioPadrao) << "\n";
         ui->console->setText(ui->console->toPlainText() + "PASSO: " + QString::number(i+1) + " Tamanho: "
-                             + QString::number(tamanhos[i]) + "\tTempo Médio: " + QString::number(media) + " s \n");
+                             + QString::number(tamanhos[i]) + "\tTempo Médio: " + QString::number(mediasBuble[i]) + " s \n");
     }
     arquivoSaida.close();
 }
@@ -205,11 +205,11 @@ void MainWindow::calculaTempoSelectSort(){
             numIteracoes++;
             ui->progressBar->setValue((numIteracoes * 100) / totalIteracoes);
         }
-        media = medias[i] = (double) (aux / numeroIteracoes);
-        desvioPadrao = calcularDesvioPadrao(tempos, media);
-        arquivoSaida << tamanhos[i] << "\t" << (int)media << "\t" << (int)(media - desvioPadrao) << "\t" << (int)(media + desvioPadrao) << "\n";
+        media = medias[i] = mediasSelect[i] = (double) (aux / numeroIteracoes);
+        desvioPadrao = desvioSelect[i] = calcularDesvioPadrao(tempos, media);
+        arquivoSaida << tamanhos[i] << "\t" << (int)mediasSelect[i] << "\t" << (int)(mediasSelect[i] - desvioPadrao) << "\t" << (int)(mediasSelect[i] + desvioPadrao) << "\n";
         ui->console->setText(ui->console->toPlainText() + "PASSO: " + QString::number(i+1) + " Tamanho: "
-                             + QString::number(tamanhos[i]) + "\tTempo Médio: " + QString::number(media) + " s \n");
+                             + QString::number(tamanhos[i]) + "\tTempo Médio: " + QString::number(mediasSelect[i]) + " s \n");
     }
     arquivoSaida.close();
 }
@@ -264,6 +264,16 @@ void MainWindow::iniciar(){
         sementes = vector<int> (numeroPassos);
         tempos = vector<int> (numeroIteracoes);
         medias = vector<double> (numeroPassos);
+
+        //desvios
+        desvioBubble = vector<double> (numeroPassos);
+        desvioQuick = vector<double> (numeroPassos);
+        desvioSelect = vector<double> (numeroPassos);
+
+        //medias
+        mediasBuble = vector<double> (numeroPassos);
+        mediasSelect = vector<double> (numeroPassos);
+        mediasQuick = vector<double> (numeroPassos);
 
         //criando os vetores de tamanos e sementes
         tamanhos[0] = tamanhoInicial;
@@ -401,6 +411,14 @@ void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSor
 
     if (selecionouBubbleSort && selecionouQuickSort && selecionouSelectSort)
     {
+        for ( int i = 0; i < numeroPassos; i++) {
+            script << "set label \"" << (int)(desvioBubble[i] / mediasBuble[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasBuble[i] <<endl;
+            script << "set label \"" << (int)(desvioSelect[i] / mediasSelect[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasSelect[i] <<endl;
+            script << "set label \"" << (int)(desvioQuick[i] / mediasQuick[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasQuick[i] <<endl;
+        }
+
+        script << endl;
+
         script << "plot 'saidaSelectSort.txt' using 1:2 notitle with lines ls 1 lt 3, 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 3" <<endl<<endl;
 
         script << "rep 'saidaQuickSort.txt' using 1:2 notitle with lines ls 2 lt 6, 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
@@ -411,17 +429,38 @@ void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSor
         {
             if (selecionouBubbleSort && selecionouQuickSort)
             {
+                for ( int i = 0; i < numeroPassos; i++) {
+                    script << "set label \"" << (int)(desvioBubble[i] / mediasBuble[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasBuble[i] <<endl;
+                    script << "set label \"" << (int)(desvioQuick[i] / mediasQuick[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasQuick[i] <<endl;
+                }
+
+                script << endl;
+
                 script << "plot 'saidaQuickSort.txt' using 1:2 notitle with lines ls 2 lt 6, 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
 
                 script << "rep 'saidaBubleSort.txt' using 1:2 notitle with lines ls 3 lt 5, 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
             }
             else if (selecionouBubbleSort && selecionouSelectSort)
             {
+                for ( int i = 0; i < numeroPassos; i++) {
+                    script << "set label \"" << (int)(desvioBubble[i] / mediasBuble[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasBuble[i] <<endl;
+                    script << "set label \"" << (int)(desvioSelect[i] / mediasSelect[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasSelect[i] <<endl;
+                }
+
+                script << endl;
+
                 script << "plot 'saidaBubleSort.txt' using 1:2 notitle with lines ls 3 lt 5, 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
 
                 script << "rep 'saidaSelectSort.txt' using 1:2 notitle with lines ls 1 lt 3, 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 3" <<endl<<endl;
             }else
             {
+                for ( int i = 0; i < numeroPassos; i++) {
+                    script << "set label \"" << (int)(desvioSelect[i] / mediasSelect[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasSelect[i] <<endl;
+                    script << "set label \"" << (int)(desvioQuick[i] / mediasQuick[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasQuick[i] <<endl;
+                }
+
+                script << endl;
+
                 script << "plot 'saidaSelectSort.txt' using 1:2 notitle with lines ls 1 lt 3, 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 3" <<endl<<endl;
 
                 script << "rep 'saidaQuickSort.txt' using 1:2 notitle with lines ls 2 lt 6, 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
@@ -430,11 +469,29 @@ void MainWindow::gerarGrafico(bool selecionouQuickSort, bool selecionouSelectSor
     else
     {
         if (selecionouBubbleSort){
+            for ( int i = 0; i < numeroPassos; i++) {
+                script << "set label \"" << (int)(desvioBubble[i] / mediasBuble[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasBuble[i] <<endl;
+            }
+
+            script << endl;
+
             script << "plot 'saidaBubleSort.txt' using 1:2 notitle with lines ls 3 lt 5, 'saidaBubleSort.txt' using 1:2:3:4 t 'BubleSort' with yerrorbars ls 3 lt 5" <<endl<<endl;
         }else{
             if (selecionouQuickSort){
+                for ( int i = 0; i < numeroPassos; i++) {
+                    script << "set label \"" << (int)(desvioQuick[i] / mediasQuick[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasQuick[i] <<endl;
+                }
+
+                script << endl;
+
                 script << "plot 'saidaQuickSort.txt' using 1:2 notitle with lines ls 2 lt 6, 'saidaQuickSort.txt' using 1:2:3:4 t 'QuickSort' with yerrorbars ls 2 lt 6" <<endl<<endl;
             }else{
+                for ( int i = 0; i < numeroPassos; i++) {
+                    script << "set label \"" << (int)(desvioSelect[i] / mediasSelect[i])*100 << "%\" at " << tamanhos[i] << "," << (int)mediasSelect[i] <<endl;
+                }
+
+                script << endl;
+
                 script << "plot 'saidaSelectSort.txt' using 1:2 notitle with lines ls 1 lt 3, 'saidaSelectSort.txt' using 1:2:3:4 t 'SelectSort' with yerrorbars ls 1 lt 3" <<endl<<endl;
             }
         }
